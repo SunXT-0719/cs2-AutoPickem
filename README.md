@@ -168,6 +168,33 @@ The simulation prints:
 - Point distribution chart from the best combination
 - Full team projections (advance / 3-0 / 0-3 rates)
 
+## Pick'em Filter
+
+The `pickem_filter` function at the bottom of `config.py` lets you reject invalid Pick'em
+combinations before they are evaluated:
+
+```python
+def pickem_filter(picks, teams):
+    """
+    picks = {"exact30": [...], "advancers": [...], "exact03": [...]}
+    Return True to keep, False to skip.
+    """
+
+    # Example: don't put TYLOO or FlyQuest in 0-3
+    if "tylo" in picks["exact03"] or "fly" in picks["exact03"]:
+        return False
+
+    # Example: don't put Brazilian teams in 3-0
+    # br_teams = {"furi", "mibr", "pain", "lega", "9z"}
+    # for code in picks["exact30"]:
+    #     if code in br_teams:
+    #         return False
+
+    return True
+```
+
+Filtered combinations are reported in the output (e.g. `(42 combination(s) rejected by pickem_filter)`).
+
 ## Data Sources
 
 - HLTV rankings from [5EPlay](https://csgo.5eplay.com) weekly reports (June 2, 2026)

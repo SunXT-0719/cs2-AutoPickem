@@ -47,11 +47,11 @@ TEAMS = {
     "nrg":  {"name": "NRG",               "vrs": 31, "hltv_rank": 33, "hltv_pts": 40,   "form": 0.42},
     "tylo": {"name": "TYLOO",             "vrs": 34, "hltv_rank": 29, "hltv_pts": 65,   "form": 0.45, "rank_bias": 5},
     "shks": {"name": "Sharks Esports",    "vrs": 37, "hltv_rank": 40, "hltv_pts": 18,   "form": 0.30},
-    "gg":   {"name": "Gaimin Gladiators", "vrs": 40, "hltv_rank": 45, "hltv_pts": 14,   "form": 0.28},
+    "gg":   {"name": "Gaimin Gladiators", "vrs": 40, "hltv_rank": 45, "hltv_pts": 14,   "form": 0.28, "rank_bias": -20},
     "liqu": {"name": "Team Liquid",       "vrs": 47, "hltv_rank": 25, "hltv_pts": 90,   "form": 0.50, "rank_bias": 5},
     "lvg":  {"name": "Lynn Vision Gaming","vrs": 49, "hltv_rank": 31, "hltv_pts": 50,   "form": 0.40, "rank_bias": 5},
     "tdu":  {"name": "THUNDERdOWNUNDER",  "vrs": 56, "hltv_rank": 60, "hltv_pts": 5,    "form": 0.20},
-    "fly":  {"name": "FlyQuest",          "vrs": 74, "hltv_rank": 70, "hltv_pts": 3,    "form": 0.22, "rank_bias": 20},
+    "fly":  {"name": "FlyQuest",          "vrs": 74, "hltv_rank": 70, "hltv_pts": 3,    "form": 0.22, "rank_bias": 10},
 }
 
 # ═══════════════════════════════════════════════════════════════════
@@ -133,3 +133,38 @@ HEAD_TO_HEAD = {
     ("hero", "lvg"): 0.55,   ("lvg", "hero"):  0.45,
     ("mouz", "g2"):  0.48,   ("g2", "mouz"):   0.52,
 }
+
+# ═══════════════════════════════════════════════════════════════════
+# 6. PICK'EM FILTER (user-customizable)
+# ═══════════════════════════════════════════════════════════════════
+# Define rules to reject invalid Pick'em combinations before evaluation.
+# Receives picks dict and TEAMS dict; return True to keep, False to skip.
+#
+# picks = {
+#     "exact30": ["code1", "code2"],       # 2 team codes
+#     "advancers": ["c1","c2",...,"c6"],   # 6 team codes
+#     "exact03": ["code1", "code2"],       # 2 team codes
+# }
+
+def pickem_filter_default(picks, teams):
+    """
+    User-customizable Pick'em validation.
+    Return True if the combination is acceptable, False to skip it.
+    """
+    return True  # default: accept all
+
+# --- Example rules (uncomment and edit) ---
+def pickem_filter_custom(picks, teams):
+    # Don't put TYLOO or FlyQuest in 0-3
+    if "tylo" in picks["exact03"]:
+        return False
+
+    # Don't put Brazilian teams in 3-0
+    br_teams = {"furi", "mibr", "pain", "lega", "9z"}
+    for code in picks["exact30"]:
+        if code in br_teams:
+            return False
+
+    return True
+
+pickem_filter = pickem_filter_custom

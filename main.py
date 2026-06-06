@@ -31,7 +31,7 @@ from collections import defaultdict
 import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from config import TEAMS, HEAD_TO_HEAD, STAGE1, STAGE2, STAGE3, STAGE1_ADVANCERS, SIM as _SIM
+from config import TEAMS, HEAD_TO_HEAD, STAGE1, STAGE2, STAGE3, STAGE1_ADVANCERS, pickem_filter, SIM as _SIM
 from swiss_simulator import (
     TeamState, simulate_swiss_stage, monte_carlo_simulate
 )
@@ -137,6 +137,7 @@ def find_best_pickem(teams_pool, stage_num, num_team_sims, num_pick_sims, num_ca
 
     # Collect top combinations (score -> picks+result), keep top 3 unique
     scored = []  # list of (score, picks_dict, result)
+    filtered_out = 0
 
     print(f"  Testing up to {num_candidates} Pick'em combinations ({num_pick_sims} trials each)...")
     tested = 0
@@ -157,15 +158,19 @@ def find_best_pickem(teams_pool, stage_num, num_team_sims, num_pick_sims, num_ca
             if tested > num_candidates:
                 break
 
-            result = evaluate_pick(
-                {"exact30": list(e30_combo), "advancers": list(adv_combo[:6]),
-                 "exact03": list(e03_combo)},
-                teams_pool, stage_num, num_pick_sims
-            )
             picks_dict = {"exact30": list(e30_combo),
                           "advancers": list(adv_combo[:6]),
                           "exact03": list(e03_combo),
                           "_strategy": "optimized"}
+
+            # Apply user filter
+            if not pickem_filter(picks_dict, TEAMS):
+                filtered_out += 1
+                continue
+
+            result = evaluate_pick(
+                picks_dict, teams_pool, stage_num, num_pick_sims
+            )
             scored.append((result["success_rate"], picks_dict, result))
 
     # Strategy-based picks
@@ -187,9 +192,15 @@ def find_best_pickem(teams_pool, stage_num, num_team_sims, num_pick_sims, num_ca
         },
     }
     for sname, picks in strategies.items():
+        if not pickem_filter(picks, TEAMS):
+            filtered_out += 1
+            continue
         result = evaluate_pick(picks, teams_pool, stage_num, num_pick_sims)
         picks["_strategy"] = sname
         scored.append((result["success_rate"], picks.copy(), result))
+
+    if filtered_out > 0:
+        print(f"  ({filtered_out} combination(s) rejected by pickem_filter)")
 
     # Keep top 3 unique (by combination fingerprint)
     def _fingerprint(p):

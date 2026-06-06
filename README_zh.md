@@ -182,6 +182,32 @@ BO3：  使用 upset_bo3 修正每图胜率后（例如 -0.10 → 80% 变为 83%
 - 最优组合的得分分布图
 - 全部队伍的晋级/3-0/0-3 概率预测
 
+## Pick'em 过滤器
+
+在 `config.py` 底部有一个 `pickem_filter` 函数，用于在评估前剔除不符合自定义规则的 Pick'em 组合：
+
+```python
+def pickem_filter(picks, teams):
+    """
+    picks = {"exact30": [...], "advancers": [...], "exact03": [...]}
+    返回 True 保留该组合，False 跳过。
+    """
+
+    # 示例：不让 TYLOO/FlyQuest 出现在 0-3
+    if "tylo" in picks["exact03"] or "fly" in picks["exact03"]:
+        return False
+
+    # 示例：不让巴西队出现在 3-0
+    # br_teams = {"furi", "mibr", "pain", "lega", "9z"}
+    # for code in picks["exact30"]:
+    #     if code in br_teams:
+    #         return False
+
+    return True
+```
+
+被过滤掉的组合数会在输出中报告（例如 `(42 combination(s) rejected by pickem_filter)`）。
+
 ## 数据来源
 
 - HLTV 排名来自 [5EPlay](https://csgo.5eplay.com) 每周排名报道（2026 年 6 月 2 日）
