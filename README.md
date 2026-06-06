@@ -1,5 +1,7 @@
 # Cologne Major 2026 — Pick'em Simulator
 
+[中文版](README_zh.md)
+
 CS2 Major Swiss stage simulator for finding optimal Pick'em selections.
 Uses an Elo/ratio hybrid win-probability model with Monte Carlo simulation.
 

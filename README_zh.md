@@ -1,5 +1,7 @@
 # 科隆 Major 2026 — Pick'em 模拟器
 
+[English](README.md)
+
 基于 Elo/比值混合胜率模型的 CS2 Major 瑞士轮模拟器，使用蒙特卡洛方法寻找最优 Pick'em 选择。
 
 ## 快速开始
